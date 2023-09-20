@@ -1,0 +1,54 @@
+version: '3.9'
+
+services:
+  # Contenedor Principal (Django) para archivos estaticos
+  backend:
+    build: ./backend/
+    command: nohup python manage.py runserver 0.0.0.0:8000 # && pwd
+    # command: gunicorn --chdir ./backend backend.wsgi:application --bind 0.0.0.0:8000 --workers 3 --timeout 120
+    volumes:
+      - ./backend/:/usr/src/app/
+      - static_volume:/usr/src/app/static/
+    expose:
+      - 8000
+    env_file:
+      - ./backend/.env
+    depends_on:
+      - db
+
+  # Contenedor POSTGRESQL para base de datos 
+  db:
+    image: postgres:latest
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    expose:
+      - 5432
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_DB=practicas
+  
+  # Contenedor NGINX para servir peticiones web 
+  nginx:
+    build: ./nginx
+    volumes:
+      - static_volume:/home/app/static/
+      # - .nginx/nginx.conf:/etc/nginx/conf.d
+    ports:
+      - 8080:80
+    depends_on:
+      - backend
+
+  # Contenedor MQTT para brocker
+  mqtt_brocker:
+    build: ./mosquitto/
+    volumes:
+      - ./mosquitto/mosquitto.conf:/mosquitto/mosquitto.conf
+    ports:
+    - 1884:1883
+    depends_on:
+      - db
+
+volumes:
+  postgres_data:
+  static_volume:

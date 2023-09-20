@@ -1,0 +1,15 @@
+django
+django-environ
+psycopg2
+gunicorn
+pillow
+djangorestframework
+pyyaml
+requests
+django-cors-headers
+django-registration
+django-webpack-loader
+paho-mqtt
+mqttasgi
+channels_redis
+django-cors-headers
